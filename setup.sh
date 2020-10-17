@@ -1,8 +1,8 @@
 # Requires Ubuntu host 18.04 DS2_V2 using hostname and user amaaks
 # Install Docker https://docs.docker.com/engine/install/ubuntu/
 sudo apt-get updates
-sudo apt-get upgrade
-sudo apt-get install \
+sudo apt-get upgrade -y
+sudo apt-get install -y \
     apt-transport-https \
     ca-certificates \
     curl \
@@ -52,6 +52,7 @@ openssl x509 -req -sha512 -days 3650 \
     -in amaaks.csr \
     -out amaaks.crt
 
+sudo mkdir -p /data/cert/
 sudo cp amaaks.crt /data/cert/
 sudo cp amaaks.key /data/cert/
 
@@ -67,16 +68,17 @@ sudo systemctl restart docker
 wget https://raw.githubusercontent.com/code4clouds/amaaks/main/harbor.yml
 #  certificate: /etc/docker/certs.d/amaaks:443/amaaks.cert
 #  private_key: /etc/docker/certs.d/amaaks:443/amaaks.key
-./prepare
-docker-compose down -v
-docker-compose up -d
+sudo ./prepare
+sudo docker-compose down -v
+sudo docker-compose up -d
 
 # Update docker to recognize the host
-cat > /etc/docker/daemon.json <<-EOF
+sudo cat > /etc/docker/daemon.json <<-EOF
 {
     "insecure-registries" : [ "amaaks" ]
 }
 EOF
+sudo mv daemon.json /etc/docker/daemon.json
 
 exit;
 # Set cron to assure all Docker-compose service are up
