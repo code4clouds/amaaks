@@ -14,3 +14,5 @@ wget https://raw.githubusercontent.com/code4clouds/amaaks/main/setup.sh
 sudo crontab -e
 @reboot sleep 60 && cd /home/amaaks/harbor && docker-compose up -d
 ```
+- Create a Harbor repository entry
+- Seed Harbor using the replication feature by using your repository entry
