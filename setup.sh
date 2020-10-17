@@ -63,7 +63,8 @@ sudo cp ca.crt /etc/docker/certs.d/amaaks:443
 sudo systemctl restart docker
 
 ## Configure Harber hostname and cert-key location
-cp harbor.yml.tmpl harbor.yml
+# cp harbor.yml.tmpl harbor.yml
+wget https://raw.githubusercontent.com/code4clouds/amaaks/main/harbor.yml
 #  certificate: /etc/docker/certs.d/amaaks:443/amaaks.cert
 #  private_key: /etc/docker/certs.d/amaaks:443/amaaks.key
 ./prepare
@@ -77,6 +78,7 @@ cat > /etc/docker/daemon.json <<-EOF
 }
 EOF
 
+exit;
 # Set cron to assure all Docker-compose service are up
 sudo crontab -e
 @reboot sleep 60 && cd /home/amaaks/harbor && docker-compose up -d
