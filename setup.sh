@@ -94,13 +94,15 @@ ssh-keygen -q -f /home/amaaks/.ssh/id_rsa -N ""
 # Install Az
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-#deploy kubernetes
+# Install Kubclt
+kubectl create secret docker-registry regcred --docker-server=amaaks --docker-username=admin --docker-password=Harbor12345 --docker-email=someguy@code4clouds.com
+wget https://raw.githubusercontent.com/code4clouds/amaaks/main/kanary-deployment.yaml 
+
+# Deploy kubernetes
 az aks create --resource-group amaaks --name amaaks  --aci-subnet-name amaaks --vnet-subnet-id amaaks --ssh-key-value ~/.ssh/id_rsa.pub
 az aks get-credentials --resource-group amaaks --name amaaks --admin
 
-#deploy containers
-kubectl create secret docker-registry regcred --docker-server=amaaks --docker-username=admin --docker-password=Harbor12345 --docker-email=someguy@code4clouds.com
-wget https://raw.githubusercontent.com/code4clouds/amaaks/main/kanary-deployment.yaml 
+# Deploy containers
 kubectl apply -f kanary-deployment.yaml
 kubectl apply -f kanary-service.yaml
 
