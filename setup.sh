@@ -15,8 +15,8 @@ sudo add-apt-repository \
    $(lsb_release -cs) \
    stable"
 sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io
- sudo usermod -aG docker amaaks
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+sudo usermod -aG docker amaaks
 
 # Install Docker-Compose
 sudo curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -87,6 +87,22 @@ curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
 echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
 sudo apt-get update
 sudo apt-get install -y kubectl
+
+# Generate Keys for Kubctl
+ssh-keygen -q -f /home/amaaks/.ssh/id_rsa -N ""
+
+# Install Az
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+#deploy kubernetes
+az aks create --resource-group amaaks --name amaaks  --aci-subnet-name amaaks --vnet-subnet-id amaaks --ssh-key-value ~/.ssh/id_rsa.pub
+az aks get-credentials --resource-group amaaks --name amaaks --admin
+
+#deploy containers
+kubectl create secret docker-registry regcred --docker-server=amaaks --docker-username=admin --docker-password=Harbor12345 --docker-email=someguy@code4clouds.com
+wget https://raw.githubusercontent.com/code4clouds/amaaks/main/kanary-deployment.yaml 
+kubectl apply -f kanary-deployment.yaml
+kubectl apply -f kanary-service.yaml
 
 
 exit;

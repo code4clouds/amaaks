@@ -8,6 +8,8 @@ Azure Ubuntu 18.04 VM
 - Download the setup script
 ``` bash
 wget https://raw.githubusercontent.com/code4clouds/amaaks/main/setup.sh
+sudo chmod +x ./setup.sh
+ ./setup.sh
 ```
 - Set cron to assure all Docker-Compose service are up
 ``` bash
