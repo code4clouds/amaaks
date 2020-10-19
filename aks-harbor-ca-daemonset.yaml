@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: registry-ca
+  namespace: kube-system
+  labels:
+    k8s-app: registry-ca
+spec:
+  selector:
+    matchLabels:
+      name: registry-ca
+  template:
+    metadata:
+      labels:
+        name: registry-ca
+    spec:
+      containers:
+      - name: registry-ca
+        image: mcr.microsoft.com/azuremonitor/containerinsights/ciprod:ciprod08072020
+        command: [ 'sh' ]
+        args: [ '-c', 'mkdir -p /etc/docker/certs.d/amaaks:443/ && cp /home/core/registry-ca /etc/docker/certs.d/amaaks:443/ca.crt && exec tail -f /dev/null' ]
+        volumeMounts:
+        - name: etc-docker
+          mountPath: /etc/docker/certs.d
+        - name: ca-cert
+          mountPath: /home/core
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: etc-docker
+        hostPath:
+          path: /etc/docker/certs.d
+      - name: ca-cert
+        secret:
+          secretName: registry-ca

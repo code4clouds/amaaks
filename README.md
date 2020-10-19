@@ -7,7 +7,7 @@ Azure Ubuntu 18.04 VM
 - Create the Ubunut VM and log in
 - Download the setup script
 ``` bash
-wget https://raw.githubusercontent.com/code4clouds/amaaks/main/setup.sh
+wget https://raw.githubusercontent.com/code4clouds/amaaks/main/vmoffer-setup.sh
 sudo chmod +x ./setup.sh
  ./setup.sh
 ```
@@ -18,3 +18,4 @@ sudo crontab -e
 ```
 - Create a Harbor repository entry
 - Seed Harbor using the replication feature by using your repository entry
+- Make sure the replica reposity is maked as public in Harbor

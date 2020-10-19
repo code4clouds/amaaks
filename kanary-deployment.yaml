@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kanary-deployment
+  labels:
+    app: kanary
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kanary
+  template:
+    metadata:
+      labels:
+        app: kanary
+    spec:
+      containers:      
+      - name: kanary        
+        image: amaaks:443/code4clouds/canarykontainer:1.2
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 5000
+      imagePullSecrets:
+          - name: amaaksregcred

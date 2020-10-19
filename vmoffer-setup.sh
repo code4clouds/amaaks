@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Requires Ubuntu host 18.04 DS2_V2 using hostname and user amaaks
 # Install Docker https://docs.docker.com/engine/install/ubuntu/
 sudo apt-get updates
@@ -61,6 +63,10 @@ sudo mkdir -p /etc/docker/certs.d/amaaks:443
 sudo cp amaaks.cert /etc/docker/certs.d/amaaks:443/
 sudo cp amaaks.key /etc/docker/certs.d/amaaks:443/
 sudo cp ca.crt /etc/docker/certs.d/amaaks:443
+cat ca.crt >> registry.pem
+cat amaaks.cert >> registry.pem
+cat amaaks.key >> registry.pem
+
 sudo systemctl restart docker
 
 ## Configure Harber hostname and cert-key location
@@ -88,24 +94,15 @@ echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/
 sudo apt-get update
 sudo apt-get install -y kubectl
 
-# Generate Keys for Kubctl
-ssh-keygen -q -f /home/amaaks/.ssh/id_rsa -N ""
-
 # Install Az
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-# Install Kubclt
-kubectl create secret docker-registry regcred --docker-server=amaaks --docker-username=admin --docker-password=Harbor12345 --docker-email=someguy@code4clouds.com
+# Copy the deployment files for the AKS configuration
+wget https://raw.githubusercontent.com/code4clouds/amaaks/main/aks-harbor-ca-daemonset.yaml 
 wget https://raw.githubusercontent.com/code4clouds/amaaks/main/kanary-deployment.yaml 
-
-# Deploy kubernetes
-az aks create --resource-group amaaks --name amaaks  --aci-subnet-name amaaks --vnet-subnet-id amaaks --ssh-key-value ~/.ssh/id_rsa.pub
-az aks get-credentials --resource-group amaaks --name amaaks --admin
-
-# Deploy containers
-kubectl apply -f kanary-deployment.yaml
-kubectl apply -f kanary-service.yaml
-
+wget https://raw.githubusercontent.com/code4clouds/amaaks/main/kanary-service.yaml 
+wget https://raw.githubusercontent.com/code4clouds/amaaks/main/aks-install.sh
+wget https://raw.githubusercontent.com/code4clouds/amaaks/main/aks-setup.sh
 
 exit;
 # Set cron to assure all Docker-compose service are up
@@ -120,3 +117,4 @@ docker login amaaks:443
 #docker push amaaks:443/library/canarykontainer:1.1
 #Setup replication for dockerhub (check the pictures on how to do this)
 docker pull amaaks:443/code4clouds/canarykontainer:1.2
+
