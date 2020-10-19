@@ -1,0 +1,423 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "virtualMachines_amaaks_name": {
+      "defaultValue": "amaaks",
+      "type": "String"
+    },
+    "disks_amaaks_OsDisk_1_6ee353c1c2124c05890a8a1b4a059fb0_externalid": {
+      "defaultValue": "/subscriptions/8ff258b7-0b3b-4827-b240-cb8cfab73615/resourceGroups/AMAAKSV2/providers/Microsoft.Compute/disks/amaaks_OsDisk_1_6ee353c1c2124c05890a8a1b4a059fb0",
+      "type": "String"
+    },
+    "networkInterfaces_amaaks148_externalid": {
+      "defaultValue": "/subscriptions/8ff258b7-0b3b-4827-b240-cb8cfab73615/resourceGroups/amaaksv2/providers/Microsoft.Network/networkInterfaces/amaaks148",
+      "type": "String"
+    },
+    "virtualNetworks_amaaks_name": {
+      "defaultValue": "amaaks",
+      "type": "String"
+    },
+    "resourceName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Managed Cluster resource."
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "The location of AKS resource."
+      }
+    },
+    "dnsPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Optional DNS prefix to use with hosted Kubernetes API server FQDN."
+      }
+    },
+    "osDiskSizeGB": {
+      "type": "int",
+      "defaultValue": 0,
+      "metadata": {
+        "description": "Disk size (in GiB) to provision for each of the agent pool nodes. This value ranges from 0 to 1023. Specifying 0 will apply the default disk size for that agentVMSize."
+      },
+      "minValue": 0,
+      "maxValue": 1023
+    },
+    "kubernetesVersion": {
+      "type": "string",
+      "defaultValue": "1.7.7",
+      "metadata": {
+        "description": "The version of Kubernetes."
+      }
+    },
+    "networkPlugin": {
+      "type": "string",
+      "allowedValues": [
+        "azure",
+        "kubenet"
+      ],
+      "metadata": {
+        "description": "Network plugin used for building Kubernetes network."
+      }
+    },
+    "enableRBAC": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Boolean flag to turn on and off of RBAC."
+      }
+    },
+    "vmssNodePool": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Boolean flag to turn on and off of virtual machine scale sets"
+      }
+    },
+    "windowsProfile": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Boolean flag to turn on and off of virtual machine scale sets"
+      }
+    },
+    "enablePrivateCluster": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable private network access to the Kubernetes cluster."
+      }
+    },
+    "enableHttpApplicationRouting": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Boolean flag to turn on and off http application routing."
+      }
+    },
+    "enableAzurePolicy": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Boolean flag to turn on and off Azure Policy addon."
+      }
+    },
+    "enableOmsAgent": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Boolean flag to turn on and off omsagent addon."
+      }
+    },
+    "workspaceRegion": {
+      "type": "string",
+      "defaultValue": "East US",
+      "metadata": {
+        "description": "Specify the region for your OMS workspace."
+      }
+    },
+    "workspaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Specify the name of the OMS workspace."
+      }
+    },
+    "omsWorkspaceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Specify the resource id of the OMS workspace."
+      }
+    },
+    "omsSku": {
+      "type": "string",
+      "defaultValue": "standalone",
+      "allowedValues": [
+        "free",
+        "standalone",
+        "pernode"
+      ],
+      "metadata": {
+        "description": "Select the SKU for your workspace."
+      }
+    },
+    "vnetSubnetID": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource ID of virtual network subnet used for nodes and/or pods IP assignment."
+      }
+    },
+    "serviceCidr": {
+      "type": "string",
+      "metadata": {
+        "description": "A CIDR notation IP range from which to assign service cluster IPs."
+      }
+    },
+    "dnsServiceIP": {
+      "type": "string",
+      "metadata": {
+        "description": "Containers DNS server IP address."
+      }
+    },
+    "dockerBridgeCidr": {
+      "type": "string",
+      "metadata": {
+        "description": "A CIDR notation IP for Docker bridge."
+      }
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2020-05-01",
+      "name": "[parameters('virtualNetworks_amaaks_name')]",
+      "location": "centralus",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.0.0.0/16"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "default",
+            "properties": {
+              "addressPrefix": "10.0.0.0/22",
+              "delegations": [],
+              "privateEndpointNetworkPolicies": "Enabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+          }
+        ],
+        "virtualNetworkPeerings": [],
+        "enableDdosProtection": false,
+        "enableVmProtection": false
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "apiVersion": "2020-05-01",
+      "name": "[concat(parameters('virtualNetworks_amaaks_name'), '/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_amaaks_name'))]"
+      ],
+      "properties": {
+        "addressPrefix": "10.0.0.0/22",
+        "delegations": [],
+        "privateEndpointNetworkPolicies": "Enabled",
+        "privateLinkServiceNetworkPolicies": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2019-07-01",
+      "name": "[parameters('virtualMachines_amaaks_name')]",
+      "location": "centralus",
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "Standard_DS2_v2"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "18.04-LTS",
+            "version": "latest"
+          },
+          "osDisk": {
+            "osType": "Linux",
+            "name": "[concat(parameters('virtualMachines_amaaks_name'), '_OsDisk_1_6ee353c1c2124c05890a8a1b4a059fb0')]",
+            "createOption": "FromImage",
+            "caching": "ReadWrite",
+            "managedDisk": {
+              "storageAccountType": "Premium_LRS",
+              "id": "[parameters('disks_amaaks_OsDisk_1_6ee353c1c2124c05890a8a1b4a059fb0_externalid')]"
+            },
+            "diskSizeGB": 30
+          },
+          "dataDisks": []
+        },
+        "osProfile": {
+          "computerName": "[parameters('virtualMachines_amaaks_name')]",
+          "adminUsername": "[parameters('virtualMachines_amaaks_name')]",
+          "linuxConfiguration": {
+            "disablePasswordAuthentication": false,
+            "provisionVMAgent": true
+          },
+          "secrets": [],
+          "allowExtensionOperations": true,
+          "requireGuestProvisionSignal": true
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[parameters('networkInterfaces_amaaks148_externalid')]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "2020-03-01",
+      "dependsOn": [],
+      "type": "Microsoft.ContainerService/managedClusters",
+      "location": "[parameters('location')]",
+      "name": "[parameters('resourceName')]",
+      "properties": {
+        "kubernetesVersion": "[parameters('kubernetesVersion')]",
+        "enableRBAC": "[parameters('enableRBAC')]",
+        "dnsPrefix": "[parameters('dnsPrefix')]",
+        "agentPoolProfiles": [
+          {
+            "name": "agentpool",
+            "osDiskSizeGB": "[parameters('osDiskSizeGB')]",
+            "count": 3,
+            "vmSize": "Standard_DS2_v2",
+            "osType": "Linux",
+            "storageProfile": "ManagedDisks",
+            "type": "VirtualMachineScaleSets",
+            "mode": "System",
+            "maxPods": 110,
+            "availabilityZones": null,
+            "vnetSubnetID": "[parameters('vnetSubnetID')]"
+          }
+        ],
+        "networkProfile": {
+          "loadBalancerSku": "standard",
+          "networkPlugin": "[parameters('networkPlugin')]",
+          "serviceCidr": "[parameters('serviceCidr')]",
+          "dnsServiceIP": "[parameters('dnsServiceIP')]",
+          "dockerBridgeCidr": "[parameters('dockerBridgeCidr')]"
+        },
+        "apiServerAccessProfile": {
+          "enablePrivateCluster": "[parameters('enablePrivateCluster')]"
+        },
+        "addonProfiles": {
+          "httpApplicationRouting": {
+            "enabled": "[parameters('enableHttpApplicationRouting')]"
+          },
+          "azurePolicy": {
+            "enabled": "[parameters('enableAzurePolicy')]"
+          },
+          "omsagent": {
+            "enabled": "[parameters('enableOmsAgent')]",
+            "config": {
+              "logAnalyticsWorkspaceResourceID": "[parameters('omsWorkspaceId')]"
+            }
+          }
+        }
+      },
+      "tags": {},
+      "identity": {
+        "type": "SystemAssigned"
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "SolutionDeployment-20201018130246",
+      "apiVersion": "2017-05-10",
+      "resourceGroup": "[split(parameters('omsWorkspaceId'),'/')[4]]",
+      "subscriptionId": "[split(parameters('omsWorkspaceId'),'/')[2]]",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "apiVersion": "2015-11-01-preview",
+              "type": "Microsoft.OperationsManagement/solutions",
+              "location": "[parameters('workspaceRegion')]",
+              "name": "[concat('ContainerInsights', '(', split(parameters('omsWorkspaceId'),'/')[8], ')')]",
+              "properties": {
+                "workspaceResourceId": "[parameters('omsWorkspaceId')]"
+              },
+              "plan": {
+                "name": "[concat('ContainerInsights', '(', split(parameters('omsWorkspaceId'),'/')[8], ')')]",
+                "product": "[concat('OMSGallery/', 'ContainerInsights')]",
+                "promotionCode": "",
+                "publisher": "Microsoft"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "ClusterMonitoringMetricPulisherRoleAssignmentDepl-20201018130246",
+      "apiVersion": "2017-05-10",
+      "resourceGroup": "amaaksv2",
+      "subscriptionId": "8ff258b7-0b3b-4827-b240-cb8cfab73615",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.ContainerService/managedClusters/providers/roleAssignments",
+              "apiVersion": "2018-01-01-preview",
+              "name": "amaaks/Microsoft.Authorization/5300cc9f-f082-4c0e-b0e9-aae9ebca9f75",
+              "properties": {
+                "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '3913510d-42f4-4e42-8a64-420c390055eb')]",
+                "principalId": "[reference(parameters('resourceName')).addonProfiles.omsagent.identity.objectId]",
+                "scope": "/subscriptions/8ff258b7-0b3b-4827-b240-cb8cfab73615/resourceGroups/amaaksv2/providers/Microsoft.ContainerService/managedClusters/amaaks"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "/subscriptions/8ff258b7-0b3b-4827-b240-cb8cfab73615/resourceGroups/amaaksv2/providers/Microsoft.ContainerService/managedClusters/amaaks"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "ClusterSubnetRoleAssignmentDeployment-20201018130246",
+      "apiVersion": "2017-05-10",
+      "resourceGroup": "amaaksv2",
+      "subscriptionId": "8ff258b7-0b3b-4827-b240-cb8cfab73615",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments",
+              "apiVersion": "2017-05-01",
+              "name": "amaaks/default/Microsoft.Authorization/be403212-9e23-4950-a7ef-e25794765482",
+              "properties": {
+                "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '4d97b98b-1d4f-4787-a291-c67834d212e7')]",
+                "principalId": "[reference(parameters('resourceName')).identityProfile.kubeletidentity.objectId]",
+                "scope": "/subscriptions/8ff258b7-0b3b-4827-b240-cb8cfab73615/resourceGroups/amaaksv2/providers/Microsoft.Network/virtualNetworks/amaaks/subnets/default"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": []
+    }
+  ],
+  "outputs": {
+    "controlPlaneFQDN": {
+      "type": "string",
+      "value": "[reference(concat('Microsoft.ContainerService/managedClusters/', parameters('resourceName'))).fqdn]"
+    }
+  }
+}
