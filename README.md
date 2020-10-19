@@ -4,7 +4,7 @@ Prototyping DO NOT USE
 Azure Ubuntu 18.04 VM
 
 # Creation of VM Offer
-- Create the Ubunut VM and log in
+- Create an Ubuntu VM and log in
 - Download the setup script
 ``` bash
 wget https://raw.githubusercontent.com/code4clouds/amaaks/main/vmoffer-setup.sh
@@ -19,6 +19,20 @@ sudo crontab -e
 - Create a Harbor repository entry
 - Seed Harbor using the replication feature by using your repository entry
 - Make sure the replica reposity is maked as public in Harbor
+- Generalize
+- Create an image for internal deployments or VM Offer (if targeting the Azure Marketplace) by generalizing the VM
+``` bash
+sudo waagent -deprovision+user --force
+logout
+```
+- Deallocate the VM
+``` bash
+ az vm deallocate --resource-group amaaks --name amaaks
+ az vm generalize --resource-group amaaks --name amaaks
+ az image create --resource-group amaaks --name amaaks --source amaaks
+ ```
+
+
 
 # Testing
 
