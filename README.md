@@ -24,7 +24,7 @@ sudo crontab -e
 
 Clicking on the button below, will create the Managed Application definition to a Resource Group in your Azure subscription.
 
-[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazure%2Fazure-managedapp-samples%2Fmaster%2FManaged%2520Application%2520Sample%2520Packages%2F101-managed-vm%2Fazuredeploy.json)
+[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fcode4clouds%2Famaaks%2Fmain%2Fazuredeploy.json)
 
 
 ``` bash

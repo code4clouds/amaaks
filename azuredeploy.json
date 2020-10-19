@@ -4,9 +4,9 @@
     "parameters": {
         "name": {
             "type": "string",
-            "defaultValue": "ManagedWebApp",
+            "defaultValue": "amaaks",
             "metadata": {
-                "description": "Provide a name for the managed application"
+                "description": "Provide a name for the Managed Application"
             }
         },
         "location": {
