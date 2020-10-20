@@ -1,0 +1,41 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "resourceName": {
+            "value": "amaaks"
+        },
+        "location": {
+            "value": "centralus"
+        },
+        "dnsPrefix": {
+            "value": "amaaks-dns"
+        },
+        "networkPlugin": {
+            "value": "azure"
+        },
+        "enableRBAC": {
+            "value": false
+        },
+        "enablePrivateCluster": {
+            "value": false
+        },
+        "enableHttpApplicationRouting": {
+            "value": false
+        },
+        "enableAzurePolicy": {
+            "value": false
+        },
+        "vmssNodePool": {
+            "value": true
+        },
+        "workspaceName": {
+            "value": "amaaks"
+        },
+        "workspaceSku": {
+            "value": "pergb2018"
+        },
+        "workspaceRegion": {
+            "value": "centralus"
+        }
+    }
+}

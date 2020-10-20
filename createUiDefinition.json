@@ -3,18 +3,25 @@
     "handler": "Microsoft.Azure.CreateUIDef",
     "version": "0.1.2-preview",
     "parameters": {
-        "basics": [
+        "basics": [ ],
+        "steps": [
             {
-                "name": "amaaks-ama",
-                "type": "Microsoft.Common.TextBlock",
-                "options": {
-                    "text": "centralus"
-                }
+                "name": "tags",
+                "label": "Tags",
+                "elements": [
+                    {
+                        "name": "tagsByResource",
+                        "type": "Microsoft.Common.TagsByResource",
+                        "resources": [
+                            "Microsoft.Storage/storageAccounts",
+                            "Microsoft.Compute/virtualMachines"
+                        ]
+                    }
+                ]
             }
         ],
-        "steps": [],
         "outputs": {
-            "location": "[location()]"
+            "tagsByResource": "[steps('tags').tagsByResource]"
         }
     }
 }
