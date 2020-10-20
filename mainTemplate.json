@@ -3,15 +3,15 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "virtualNetworks_amaaks_name": {
-      "defaultValue": "amaaks",
+      "defaultValue": "amaaks-vnet",
       "type": "String"
     },
-    "resourceName": {
+    "clusterName": {
       "type": "string",
       "metadata": {
         "description": "The name of the Managed Cluster resource."
       },
-      "defaultValue": "amaaks"
+      "defaultValue": "amaaks-cluster"
     },
     "location": {
       "type": "string",
@@ -19,13 +19,6 @@
         "description": "The location of AKS resource."
       },
       "defaultValue": "centralus"
-    },
-    "workspaceName": {
-      "type": "string",
-      "metadata": {
-        "description": "Names of the workspace."
-      },
-      "defaultValue": "amaaks"
     },
     "workspaceSku": {
       "type": "string",
@@ -134,7 +127,7 @@
     },
     "networkInterfaceName": {
       "type": "string",
-      "defaultValue": "amaaks"
+      "defaultValue": "amaaks-nic"
     },
     "networkSecurityGroupName": {
       "type": "string",
@@ -176,7 +169,7 @@
     },
     "virtualMachineName": {
       "type": "string",
-      "defaultValue": "amaaks"
+      "defaultValue": "amaaks-vm"
     },
     "virtualMachineComputerName": {
       "type": "string",
@@ -196,7 +189,7 @@
     },
     "adminPassword": {
       "type": "secureString",
-      "defaultValue": "2d7cd011db47"
+      "defaultValue": "amaAKS!@#2d7cd011db47"
     },
     "zone": {
       "type": "string",
@@ -206,12 +199,13 @@
   "variables": {
     "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
     "vnetId": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks', parameters('virtualNetworks_amaaks_name') )]",
-    "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]"
+    "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
+    "workspaceName": "[concat(resourceGroup().name, '-workspace')]"
   },
   "resources": [
     {
       "apiVersion": "2017-03-15-preview",
-      "name": "[parameters('workspaceName')]",
+      "name": "[variables('workspaceName')]",
       "location": "[parameters('location')]",
       "type": "Microsoft.OperationalInsights/workspaces",
       "properties": {
@@ -224,7 +218,7 @@
       "type": "Microsoft.Network/virtualNetworks",
       "apiVersion": "2020-05-01",
       "name": "[parameters('virtualNetworks_amaaks_name')]",
-      "location": "centralus",
+      "location": "[parameters('location')]",
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
@@ -259,7 +253,7 @@
         "delegations": [],
         "privateEndpointNetworkPolicies": "Enabled",
         "privateLinkServiceNetworkPolicies": "Enabled"
-      }
+      }      
     },
     {
       "name": "[parameters('networkInterfaceName')]",
@@ -268,7 +262,8 @@
       "location": "[parameters('location')]",
       "dependsOn": [
         "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
-        "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressName'))]"
+        "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_amaaks_name'))]"
       ],
       "properties": {
         "ipConfigurations": [
@@ -317,10 +312,11 @@
     {
       "name": "[parameters('virtualMachineName')]",
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2020-06-01",
+      "apiVersion": "2019-07-01",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]"
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]",
+        "[resourceId('Microsoft.ContainerService/managedClusters/', parameters('clusterName'))]"
       ],
       "properties": {
         "hardwareProfile": {
@@ -351,7 +347,7 @@
         },
         "diagnosticsProfile": {
           "bootDiagnostics": {
-            "enabled": true
+            "enabled": false
           }
         }
       },
@@ -361,10 +357,12 @@
     },
     {
       "apiVersion": "2020-03-01",
-      "dependsOn": [],
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_amaaks_name'))]"  
+      ],
       "type": "Microsoft.ContainerService/managedClusters",
+      "name": "[parameters('clusterName')]",
       "location": "[parameters('location')]",
-      "name": "[parameters('resourceName')]",
       "properties": {
         "kubernetesVersion": "[parameters('kubernetesVersion')]",
         "enableRBAC": "[parameters('enableRBAC')]",
@@ -408,7 +406,7 @@
           "omsagent": {
             "enabled": "[parameters('enableOmsAgent')]",
             "config": {
-              "logAnalyticsWorkspaceResourceID": "[resourceId(resourceGroup().name, 'Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]"
+              "logAnalyticsWorkspaceResourceID": "[resourceId(resourceGroup().name, 'Microsoft.OperationalInsights/workspaces', variables('workspaceName'))]"
             }
           }
         }
@@ -417,11 +415,78 @@
       "identity": {
         "type": "SystemAssigned"
       }
+    },
+   {
+      "type": "Microsoft.Resources/deployments",
+      "name": "SolutionDeployment",
+      "apiVersion": "2017-05-10",
+      "resourceGroup": "[split(resourceId(resourceGroup().name, 'Microsoft.OperationalInsights/workspaces', variables('workspaceName')),'/')[4]]",
+      "subscriptionId": "[split(resourceId(resourceGroup().name, 'Microsoft.OperationalInsights/workspaces', variables('workspaceName')),'/')[2]]",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "apiVersion": "2015-11-01-preview",
+              "type": "Microsoft.OperationsManagement/solutions",
+              "location": "[parameters('workspaceRegion')]",
+              "name": "[concat('ContainerInsights', '(', split(resourceId(resourceGroup().name, 'Microsoft.OperationalInsights/workspaces', variables('workspaceName')),'/')[8], ')')]",
+              "properties": {
+                "workspaceResourceId": "[resourceId(resourceGroup().name, 'Microsoft.OperationalInsights/workspaces', variables('workspaceName'))]"
+              },
+              "plan": {
+                "name": "[concat('ContainerInsights', '(', split(resourceId(resourceGroup().name, 'Microsoft.OperationalInsights/workspaces', variables('workspaceName')),'/')[8], ')')]",
+                "product": "[concat('OMSGallery/', 'ContainerInsights')]",
+                "promotionCode": "",
+                "publisher": "Microsoft"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.OperationalInsights/workspaces/',variables('workspaceName'))]"
+      ]
+    },
+
+  
+
+
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "ClusterSubnetRoleAssignmentDeployment",
+      "apiVersion": "2017-05-10",
+      "resourceGroup": "[resourceGroup().name]",
+      "subscriptionId": "8ff258b7-0b3b-4827-b240-cb8cfab73615",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments",
+              "apiVersion": "2017-05-01",
+              "name": "[concat(parameters('virtualNetworks_amaaks_name'), '/', parameters('subnetName'), '/Microsoft.Authorization/', guid(resourceGroup().id, deployment().name))]",
+              "properties": {
+                "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '4d97b98b-1d4f-4787-a291-c67834d212e7')]",
+                "principalId": "[reference(parameters('clusterName')).identityProfile.kubeletidentity.objectId]",                
+                "scope": "[variables('subnetRef')]"
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+      ]
     }
 
-    
-
-    
 
 
   ],
