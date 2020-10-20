@@ -1,19 +1,7 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "virtualMachines_amaaks_name": {
-      "defaultValue": "amaaks",
-      "type": "String"
-    },
-    "disks_amaaks_OsDisk_1_6ee353c1c2124c05890a8a1b4a059fb0_externalid": {
-      "defaultValue": "/subscriptions/8ff258b7-0b3b-4827-b240-cb8cfab73615/resourceGroups/AMAAKSV2/providers/Microsoft.Compute/disks/amaaks_OsDisk_1_6ee353c1c2124c05890a8a1b4a059fb0",
-      "type": "String"
-    },
-    "networkInterfaces_amaaks148_externalid": {
-      "defaultValue": "/subscriptions/8ff258b7-0b3b-4827-b240-cb8cfab73615/resourceGroups/amaaksv2/providers/Microsoft.Network/networkInterfaces/amaaks148",
-      "type": "String"
-    },
     "virtualNetworks_amaaks_name": {
       "defaultValue": "amaaks",
       "type": "String"
@@ -22,19 +10,36 @@
       "type": "string",
       "metadata": {
         "description": "The name of the Managed Cluster resource."
-      }
+      },
+      "defaultValue": "amaaks"
     },
     "location": {
       "type": "string",
       "metadata": {
         "description": "The location of AKS resource."
-      }
+      },
+      "defaultValue": "centralus"
+    },
+    "workspaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Names of the workspace."
+      },
+      "defaultValue": "amaaks"
+    },
+    "workspaceSku": {
+      "type": "string",
+      "metadata": {
+        "description": "Names of the workspace."
+      },
+      "defaultValue": "pergb2018"
     },
     "dnsPrefix": {
       "type": "string",
       "metadata": {
         "description": "Optional DNS prefix to use with hosted Kubernetes API server FQDN."
-      }
+      },
+      "defaultValue": "[resourceGroup().name]"
     },
     "osDiskSizeGB": {
       "type": "int",
@@ -47,7 +52,7 @@
     },
     "kubernetesVersion": {
       "type": "string",
-      "defaultValue": "1.7.7",
+      "defaultValue": "1.17.11",
       "metadata": {
         "description": "The version of Kubernetes."
       }
@@ -60,27 +65,14 @@
       ],
       "metadata": {
         "description": "Network plugin used for building Kubernetes network."
-      }
+      },
+      "defaultValue": "azure"
     },
     "enableRBAC": {
       "type": "bool",
       "defaultValue": true,
       "metadata": {
         "description": "Boolean flag to turn on and off of RBAC."
-      }
-    },
-    "vmssNodePool": {
-      "type": "bool",
-      "defaultValue": false,
-      "metadata": {
-        "description": "Boolean flag to turn on and off of virtual machine scale sets"
-      }
-    },
-    "windowsProfile": {
-      "type": "bool",
-      "defaultValue": false,
-      "metadata": {
-        "description": "Boolean flag to turn on and off of virtual machine scale sets"
       }
     },
     "enablePrivateCluster": {
@@ -113,62 +105,121 @@
     },
     "workspaceRegion": {
       "type": "string",
-      "defaultValue": "East US",
+      "defaultValue": "centralus",
       "metadata": {
         "description": "Specify the region for your OMS workspace."
       }
     },
-    "workspaceName": {
-      "type": "string",
-      "metadata": {
-        "description": "Specify the name of the OMS workspace."
-      }
-    },
-    "omsWorkspaceId": {
-      "type": "string",
-      "metadata": {
-        "description": "Specify the resource id of the OMS workspace."
-      }
-    },
-    "omsSku": {
-      "type": "string",
-      "defaultValue": "standalone",
-      "allowedValues": [
-        "free",
-        "standalone",
-        "pernode"
-      ],
-      "metadata": {
-        "description": "Select the SKU for your workspace."
-      }
-    },
-    "vnetSubnetID": {
-      "type": "string",
-      "metadata": {
-        "description": "Resource ID of virtual network subnet used for nodes and/or pods IP assignment."
-      }
-    },
+
     "serviceCidr": {
       "type": "string",
       "metadata": {
         "description": "A CIDR notation IP range from which to assign service cluster IPs."
-      }
+      },
+      "defaultValue": "11.0.0.0/22"
     },
     "dnsServiceIP": {
       "type": "string",
       "metadata": {
         "description": "Containers DNS server IP address."
-      }
+      },
+      "defaultValue": "11.0.0.10"
     },
     "dockerBridgeCidr": {
       "type": "string",
       "metadata": {
         "description": "A CIDR notation IP for Docker bridge."
-      }
+      },
+      "defaultValue": "172.17.0.1/16"
+    },
+    "networkInterfaceName": {
+      "type": "string",
+      "defaultValue": "amaaks"
+    },
+    "networkSecurityGroupName": {
+      "type": "string",
+      "defaultValue": "amaaks-nsg"
+    },
+    "networkSecurityGroupRules": {
+      "type": "array",
+      "defaultValue": [
+        {
+          "name": "SSH",
+          "properties": {
+            "priority": 300,
+            "protocol": "TCP",
+            "access": "Allow",
+            "direction": "Inbound",
+            "sourceAddressPrefix": "*",
+            "sourcePortRange": "*",
+            "destinationAddressPrefix": "*",
+            "destinationPortRange": "22"
+          }
+        }
+      ]
+    },
+    "subnetName": {
+      "type": "string",
+      "defaultValue": "default"
+    },
+    "publicIpAddressName": {
+      "type": "string",
+      "defaultValue": "amaaks-ip"
+    },
+    "publicIpAddressType": {
+      "type": "string",
+      "defaultValue": "Static"
+    },
+    "publicIpAddressSku": {
+      "type": "string",
+      "defaultValue": "Standard"
+    },
+    "virtualMachineName": {
+      "type": "string",
+      "defaultValue": "amaaks"
+    },
+    "virtualMachineComputerName": {
+      "type": "string",
+      "defaultValue": "amaaks"
+    },
+    "osDiskType": {
+      "type": "string",
+      "defaultValue": "Premium_LRS"
+    },
+    "virtualMachineSize": {
+      "type": "string",
+      "defaultValue": "Standard_DS2_v2"
+    },
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "amaaks"
+    },
+    "adminPassword": {
+      "type": "secureString",
+      "defaultValue": "2d7cd011db47"
+    },
+    "zone": {
+      "type": "string",
+      "defaultValue": "1"
     }
   },
-  "variables": {},
+  "variables": {
+    "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
+    "vnetId": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks', parameters('virtualNetworks_amaaks_name') )]",
+    "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]"
+  },
   "resources": [
+    {
+      "apiVersion": "2017-03-15-preview",
+      "name": "[parameters('workspaceName')]",
+      "location": "[parameters('location')]",
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "properties": {
+        "sku": {
+          "name": "[parameters('workspaceSku')]"
+        }
+      }
+    },
     {
       "type": "Microsoft.Network/virtualNetworks",
       "apiVersion": "2020-05-01",
@@ -211,58 +262,102 @@
       }
     },
     {
+      "name": "[parameters('networkInterfaceName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2018-10-01",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
+        "[concat('Microsoft.Network/publicIpAddresses/', parameters('publicIpAddressName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIpAddress": {
+                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[variables('nsgId')]"
+        }
+      }
+    },
+    {
+      "name": "[parameters('networkSecurityGroupName')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2019-02-01",
+      "location": "[parameters('location')]",
+      "properties": {
+        "securityRules": "[parameters('networkSecurityGroupRules')]"
+      }
+    },
+    {
+      "name": "[parameters('publicIpAddressName')]",
+      "type": "Microsoft.Network/publicIpAddresses",
+      "apiVersion": "2019-02-01",
+      "location": "[parameters('location')]",
+      "properties": {
+        "publicIpAllocationMethod": "[parameters('publicIpAddressType')]"
+      },
+      "sku": {
+        "name": "[parameters('publicIpAddressSku')]"
+      },
+      "zones": [
+        "[parameters('zone')]"
+      ]
+    },
+    {
+      "name": "[parameters('virtualMachineName')]",
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2019-07-01",
-      "name": "[parameters('virtualMachines_amaaks_name')]",
-      "location": "centralus",
+      "apiVersion": "2020-06-01",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]"
+      ],
       "properties": {
         "hardwareProfile": {
-          "vmSize": "Standard_DS2_v2"
+          "vmSize": "[parameters('virtualMachineSize')]"
         },
         "storageProfile": {
-          "imageReference": {
-            "publisher": "Canonical",
-            "offer": "UbuntuServer",
-            "sku": "18.04-LTS",
-            "version": "latest"
-          },
           "osDisk": {
-            "osType": "Linux",
-            "name": "[concat(parameters('virtualMachines_amaaks_name'), '_OsDisk_1_6ee353c1c2124c05890a8a1b4a059fb0')]",
-            "createOption": "FromImage",
-            "caching": "ReadWrite",
+            "createOption": "fromImage",
             "managedDisk": {
-              "storageAccountType": "Premium_LRS",
-              "id": "[parameters('disks_amaaks_OsDisk_1_6ee353c1c2124c05890a8a1b4a059fb0_externalid')]"
-            },
-            "diskSizeGB": 30
+              "storageAccountType": "[parameters('osDiskType')]"
+            }
           },
-          "dataDisks": []
-        },
-        "osProfile": {
-          "computerName": "[parameters('virtualMachines_amaaks_name')]",
-          "adminUsername": "[parameters('virtualMachines_amaaks_name')]",
-          "linuxConfiguration": {
-            "disablePasswordAuthentication": false,
-            "provisionVMAgent": true
-          },
-          "secrets": [],
-          "allowExtensionOperations": true,
-          "requireGuestProvisionSignal": true
+          "imageReference": {
+            "id": "/subscriptions/8ff258b7-0b3b-4827-b240-cb8cfab73615/resourceGroups/amaaksv2/providers/Microsoft.Compute/images/amaaks"
+          }
         },
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[parameters('networkInterfaces_amaaks148_externalid')]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]"
             }
           ]
+        },
+        "osProfile": {
+          "computerName": "[parameters('virtualMachineComputerName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
         },
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": true
           }
         }
-      }
+      },
+      "zones": [
+        "[parameters('zone')]"
+      ]
     },
     {
       "apiVersion": "2020-03-01",
@@ -285,8 +380,12 @@
             "type": "VirtualMachineScaleSets",
             "mode": "System",
             "maxPods": 110,
-            "availabilityZones": null,
-            "vnetSubnetID": "[parameters('vnetSubnetID')]"
+            "availabilityZones": [
+              "1",
+              "2",
+              "3"
+            ],
+            "vnetSubnetID": "[variables('subnetRef')]"
           }
         ],
         "networkProfile": {
@@ -309,7 +408,7 @@
           "omsagent": {
             "enabled": "[parameters('enableOmsAgent')]",
             "config": {
-              "logAnalyticsWorkspaceResourceID": "[parameters('omsWorkspaceId')]"
+              "logAnalyticsWorkspaceResourceID": "[resourceId(resourceGroup().name, 'Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]"
             }
           }
         }
@@ -318,106 +417,15 @@
       "identity": {
         "type": "SystemAssigned"
       }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "name": "SolutionDeployment-20201018130246",
-      "apiVersion": "2017-05-10",
-      "resourceGroup": "[split(parameters('omsWorkspaceId'),'/')[4]]",
-      "subscriptionId": "[split(parameters('omsWorkspaceId'),'/')[2]]",
-      "properties": {
-        "mode": "Incremental",
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "parameters": {},
-          "variables": {},
-          "resources": [
-            {
-              "apiVersion": "2015-11-01-preview",
-              "type": "Microsoft.OperationsManagement/solutions",
-              "location": "[parameters('workspaceRegion')]",
-              "name": "[concat('ContainerInsights', '(', split(parameters('omsWorkspaceId'),'/')[8], ')')]",
-              "properties": {
-                "workspaceResourceId": "[parameters('omsWorkspaceId')]"
-              },
-              "plan": {
-                "name": "[concat('ContainerInsights', '(', split(parameters('omsWorkspaceId'),'/')[8], ')')]",
-                "product": "[concat('OMSGallery/', 'ContainerInsights')]",
-                "promotionCode": "",
-                "publisher": "Microsoft"
-              }
-            }
-          ]
-        }
-      },
-      "dependsOn": []
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "name": "ClusterMonitoringMetricPulisherRoleAssignmentDepl-20201018130246",
-      "apiVersion": "2017-05-10",
-      "resourceGroup": "amaaksv2",
-      "subscriptionId": "8ff258b7-0b3b-4827-b240-cb8cfab73615",
-      "properties": {
-        "mode": "Incremental",
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "parameters": {},
-          "variables": {},
-          "resources": [
-            {
-              "type": "Microsoft.ContainerService/managedClusters/providers/roleAssignments",
-              "apiVersion": "2018-01-01-preview",
-              "name": "amaaks/Microsoft.Authorization/5300cc9f-f082-4c0e-b0e9-aae9ebca9f75",
-              "properties": {
-                "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '3913510d-42f4-4e42-8a64-420c390055eb')]",
-                "principalId": "[reference(parameters('resourceName')).addonProfiles.omsagent.identity.objectId]",
-                "scope": "/subscriptions/8ff258b7-0b3b-4827-b240-cb8cfab73615/resourceGroups/amaaksv2/providers/Microsoft.ContainerService/managedClusters/amaaks"
-              }
-            }
-          ]
-        }
-      },
-      "dependsOn": [
-        "/subscriptions/8ff258b7-0b3b-4827-b240-cb8cfab73615/resourceGroups/amaaksv2/providers/Microsoft.ContainerService/managedClusters/amaaks"
-      ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "name": "ClusterSubnetRoleAssignmentDeployment-20201018130246",
-      "apiVersion": "2017-05-10",
-      "resourceGroup": "amaaksv2",
-      "subscriptionId": "8ff258b7-0b3b-4827-b240-cb8cfab73615",
-      "properties": {
-        "mode": "Incremental",
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "parameters": {},
-          "variables": {},
-          "resources": [
-            {
-              "type": "Microsoft.Network/virtualNetworks/subnets/providers/roleAssignments",
-              "apiVersion": "2017-05-01",
-              "name": "amaaks/default/Microsoft.Authorization/be403212-9e23-4950-a7ef-e25794765482",
-              "properties": {
-                "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '4d97b98b-1d4f-4787-a291-c67834d212e7')]",
-                "principalId": "[reference(parameters('resourceName')).identityProfile.kubeletidentity.objectId]",
-                "scope": "/subscriptions/8ff258b7-0b3b-4827-b240-cb8cfab73615/resourceGroups/amaaksv2/providers/Microsoft.Network/virtualNetworks/amaaks/subnets/default"
-              }
-            }
-          ]
-        }
-      },
-      "dependsOn": []
     }
+
+    
+
+    
+
+
   ],
   "outputs": {
-    "controlPlaneFQDN": {
-      "type": "string",
-      "value": "[reference(concat('Microsoft.ContainerService/managedClusters/', parameters('resourceName'))).fqdn]"
-    }
+
   }
 }
