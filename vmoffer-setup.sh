@@ -128,8 +128,6 @@ curl -u "admin:Harbor12345" \
   --compressed \
   --insecure
 
-
-
 # Install KubeCtl
 sudo apt-get update && sudo apt-get install -y apt-transport-https gnupg2 curl
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
@@ -144,8 +142,6 @@ curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 wget https://raw.githubusercontent.com/code4clouds/amaaks/main/aks-harbor-ca-daemonset.yaml 
 wget https://raw.githubusercontent.com/code4clouds/amaaks/main/kanary-deployment.yaml 
 wget https://raw.githubusercontent.com/code4clouds/amaaks/main/kanary-service.yaml 
-wget https://raw.githubusercontent.com/code4clouds/amaaks/main/aks-install.sh
-wget https://raw.githubusercontent.com/code4clouds/amaaks/main/aks-setup.sh
 
 exit;
 # Set cron to assure all Docker-compose service are up

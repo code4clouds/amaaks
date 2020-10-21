@@ -11,11 +11,6 @@ wget https://raw.githubusercontent.com/code4clouds/amaaks/main/vmoffer-setup.sh
 sudo chmod +x ./setup.sh
  ./setup.sh
 ```
-- Set cron to assure all Docker-Compose service are up
-``` bash
-sudo crontab -e
-@reboot sleep 60 && cd /home/amaaks/harbor && docker-compose up -d
-```
 - Create a Harbor repository entry
 - Seed Harbor using the replication feature by using your repository entry
 - Make sure the replica reposity is maked as public in Harbor
