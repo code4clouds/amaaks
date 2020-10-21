@@ -67,18 +67,6 @@ cat ca.crt >> registry.pem
 cat amaaks.cert >> registry.pem
 cat amaaks.key >> registry.pem
 
-sudo systemctl restart docker
-
-## Configure Harber hostname and cert-key location
-# cp harbor.yml.tmpl harbor.yml
-wget https://raw.githubusercontent.com/code4clouds/amaaks/main/harbor.yml
-#  certificate: /etc/docker/certs.d/amaaks:443/amaaks.cert
-#  private_key: /etc/docker/certs.d/amaaks:443/amaaks.key
-sudo ./prepare
-sudo docker-compose down -v
-sudo docker-compose up -d
-(crontab -l ; echo "@reboot sleep 60 && cd /home/amaaks/harbor && docker-compose up -d1")| crontab -
-
 # Update docker to recognize the host
 sudo cat > daemon.json <<-EOF
 {
@@ -87,17 +75,31 @@ sudo cat > daemon.json <<-EOF
 EOF
 sudo mv daemon.json /etc/docker/daemon.json
 
+sudo systemctl restart docker
+
+## Configure Harber hostname and cert-key location
+# cp harbor.yml.tmpl harbor.yml
+wget https://raw.githubusercontent.com/code4clouds/amaaks/main/harbor.yml
+#  certificate: /etc/docker/certs.d/amaaks:443/amaaks.cert
+#  private_key: /etc/docker/certs.d/amaaks:443/amaaks.key
+sudo ./prepare
+#sudo docker-compose down -v
+sudo docker-compose up -d
+(crontab -l ; echo "@reboot sleep 60 && cd /home/amaaks/harbor && docker-compose up -d")| crontab -
+
 # Configure Harbor
 
 # Create Project
 echo "Seeding Harbor..."
-sleep 30
+sleep 30 # warmup time for the Harbor Registry
+
 curl -u "admin:Harbor12345" \
   -H "Content-Type: application/json" \
   -ki https://amaaks/api/v2.0/projects \
   --data-binary '{"project_name":"code4clouds","registry_id":null,"metadata":{"public":"true"},"storage_limit":-1}' \
   --compressed \
   --insecure
+  
 # Create Registry Endpoint
 curl -u "admin:Harbor12345" \
   -H "Content-Type: application/json" \
@@ -121,7 +123,10 @@ curl -u "admin:Harbor12345" \
   --data-binary '{"policy_id":1}' \
   --compressed \
   --insecure
+
+sleep 30 # wait time to let harbor copy the images
 echo "Seeding Harbor Completed..."
+cd ..
 
 # Install KubeCtl
 sudo apt-get update && sudo apt-get install -y apt-transport-https gnupg2 curl
@@ -137,6 +142,9 @@ curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 wget https://raw.githubusercontent.com/code4clouds/amaaks/main/aks-harbor-ca-daemonset.yaml 
 wget https://raw.githubusercontent.com/code4clouds/amaaks/main/kanary-deployment.yaml 
 wget https://raw.githubusercontent.com/code4clouds/amaaks/main/kanary-service.yaml 
+wget https://raw.githubusercontent.com/code4clouds/amaaks/main/aks-setup.sh
+sudo chmod +x aks-setup.sh
+./aks-setup.sh
 
 exit;
 

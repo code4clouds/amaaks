@@ -1,4 +1,8 @@
 #!/bin/bash
+az login --identity
+
+az login --identity -u /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+az login --identity -u /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
 
 az aks get-credentials --resource-group amaaksv2 --name amaaks --admin
 
@@ -10,7 +14,7 @@ metadata:
   namespace: kube-system
 type: Opaque
 data:
-  registry-ca: $(cat ca.crt | base64 -w 0 | tr -d '\n')
+  registry-ca: $(cat ./harbor/ca.crt | base64 -w 0 | tr -d '\n')
 EOF
 
 kubectl apply -f aks-harbor-ca-daemonset.yaml

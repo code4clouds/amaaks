@@ -4,21 +4,7 @@
     "version": "0.1.2-preview",
     "parameters": {
         "basics": [ ],
-        "steps": [
-            {
-                "name": "tags",
-                "label": "Tags",
-                "elements": [
-                    {
-                        "name": "tagsByResource",
-                        "type": "Microsoft.Common.TagsByResource",
-                        "resources": [
-                            "Microsoft.Storage/storageAccounts",
-                            "Microsoft.Compute/virtualMachines"
-                        ]
-                    }
-                ]
-            }
+        "steps": [           
         ],
         "outputs": {
             "tagsByResource": "[steps('tags').tagsByResource]"

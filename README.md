@@ -8,9 +8,11 @@ Azure Ubuntu 18.04 VM
 - Download the setup script
 ``` bash
 wget https://raw.githubusercontent.com/code4clouds/amaaks/main/vmoffer-setup.sh
-sudo chmod +x ./setup.sh
- ./setup.sh
+cat ./vmoffer-setup.sh | gzip -9 | base64 -w 0 # to use for script for VM custom extension script (optional)
+sudo chmod +x ./vmoffer-setup.sh
+ ./vmofffer-setup.sh
 ```
+
 - Create a Harbor repository entry
 - Seed Harbor using the replication feature by using your repository entry
 - Make sure the replica reposity is maked as public in Harbor
