@@ -80,119 +80,50 @@ sudo docker-compose up -d
 (crontab -l ; echo "@reboot sleep 60 && cd /home/amaaks/harbor && docker-compose up -d1")| crontab -
 
 # Update docker to recognize the host
-sudo cat > /etc/docker/daemon.json <<-EOF
+sudo cat > daemon.json <<-EOF
 {
     "insecure-registries" : [ "amaaks" ]
 }
 EOF
 sudo mv daemon.json /etc/docker/daemon.json
 
+# Configure Harbor
 
-# Download the containers
-# Login
-curl --cookie-jar cookie.txt 'https://40.69.185.20/c/login' \
-  -H 'Connection: keep-alive' \
-  -H 'Pragma: no-cache' \
-  -H 'Cache-Control: no-cache' \
-  -H 'Accept: application/json, text/plain, */*' \
-  -H 'DNT: 1' \
-  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36 Edg/86.0.622.43' \
-  -H 'X-Harbor-CSRF-Token: H3zWo7cIC4H7fef8DyDkfjPqZXvUWoEwkoQ+HNlnIpcWuLXOWBM06GqJiFBhiMmruXrKKs5YKb5AmdkXcqxpKg==' \
-  -H 'Content-Type: application/x-www-form-urlencoded' \
-  -H 'Origin: https://40.69.185.20' \
-  -H 'Sec-Fetch-Site: same-origin' \
-  -H 'Sec-Fetch-Mode: cors' \
-  -H 'Sec-Fetch-Dest: empty' \
-  -H 'Referer: https://40.69.185.20/harbor/sign-in?redirect_url=%2Fharbor%2Fprojects' \
-  -H 'Accept-Language: en-US,en;q=0.9' \
-  -H 'Cookie: sid=65e4c4bc107d6eed739ba931bd5cab7e; _gorilla_csrf=MTYwMzI0MzMyOHxJa05qVW1waVpUaGlVREp0VWpsSEszTmljV2QwTVZseFVYSXhSV0ZCY1dsUE1HZ3pia00yZGt4VE56QTlJZ289fIkI5cxwOLIwL3W-5XPNSvsyYkKcW7uW8qhoqgjfX6F8' \
+# Create Project
+curl -u "admin:Harbor12345" \
+  -H "Content-Type: application/json" \
+  -ki https://amaaks/api/v2.0/projects \
+  --data-binary '{"project_name":"code4clouds","registry_id":null,"metadata":{"public":"true"},"storage_limit":-1}' \
   --compressed \
-  --insecure \
-  --data-raw 'principal=admin&password=Harbor12345' 
-
-# Create REgistry Endpoint
-curl -b cookie.txt 'https://40.69.185.20/api/v2.0/registries' \
-  -H 'Connection: keep-alive' \
-  -H 'Pragma: no-cache' \
-  -H 'Cache-Control: no-cache' \
-  -H 'Accept: application/json' \
-  -H 'DNT: 1' \
-  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36 Edg/86.0.622.43' \
-  -H 'X-Harbor-CSRF-Token: bt9YxcOVRt8S2QdosMLAk7k86XPc5768qVSiJycPTPNnGzuoLI55toMtaMTeau1GM6xGIsblFjJ7SUUsjMQHTg==' \
-  -H 'Content-Type: application/json' \
-  -H 'Origin: https://40.69.185.20' \
-  -H 'Sec-Fetch-Site: same-origin' \
-  -H 'Sec-Fetch-Mode: cors' \
-  -H 'Sec-Fetch-Dest: empty' \
-  -H 'Referer: https://40.69.185.20/harbor/registries' \
-  -H 'Accept-Language: en-US,en;q=0.9' \
-  -H 'Cookie: _gorilla_csrf=MTYwMzI0MzMyOHxJa05qVW1waVpUaGlVREp0VWpsSEszTmljV2QwTVZseFVYSXhSV0ZCY1dsUE1HZ3pia00yZGt4VE56QTlJZ289fIkI5cxwOLIwL3W-5XPNSvsyYkKcW7uW8qhoqgjfX6F8; sid=d0f27f91a334ddecd4ef964682eceab6' \
+  --insecure
+# Create Registry Endpoint
+curl -u "admin:Harbor12345" \
+  -H "Content-Type: application/json" \
+  -ki https://amaaks/api/v2.0/registries \
   --data-binary '{"credential":{"access_key":"","access_secret":"","type":"basic"},"description":"","insecure":false,"name":"code4clouds","type":"docker-hub","url":"https://hub.docker.com"}' \
   --compressed \
   --insecure
 
+# Create Replica
+curl -u "admin:Harbor12345" \
+  -H "Content-Type: application/json" \
+  -ki https://amaaks/api/v2.0/replication/policies \  
+  --data-binary '{"name":"code4clouds","description":"","src_registry":{"id":1,"name":"code4clouds","description":"","type":"docker-hub","url":"https://hub.docker.com","token_service_url":"","credential":{"type":"","access_key":"","access_secret":""},"insecure":false,"status":"healthy","creation_time":"2020-10-21T05:48:49.305762Z","update_time":"2020-10-21T06:01:57.334003Z"},"dest_registry":null,"dest_namespace":null,"trigger":{"type":"manual","trigger_settings":{"cron":""}},"enabled":true,"deletion":false,"override":false,"filters":[{"type":"name","value":"code4clouds/**"}]}' \
+  --compressed \
+  --insecure
+  
 # Make Repo Public
-curl  -b cookie.txt 'https://40.69.185.20/api/v2.0/projects/2' \
-  -X 'PUT' \
-  -H 'Connection: keep-alive' \
-  -H 'Pragma: no-cache' \
-  -H 'Cache-Control: no-cache' \
-  -H 'Accept: application/json' \
-  -H 'DNT: 1' \
-  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36 Edg/86.0.622.43' \
-  -H 'X-Harbor-CSRF-Token: kJGwgMfG8WIRf0VDdfYXDWj0ckaFO+c7oyHywZnhMbeZVdPtKN3OC4CLKu8bXjrY4mTdF585T7VxPBXKMip6Cg==' \
-  -H 'Content-Type: application/json' \
-  -H 'Origin: https://40.69.185.20' \
-  -H 'Sec-Fetch-Site: same-origin' \
-  -H 'Sec-Fetch-Mode: cors' \
-  -H 'Sec-Fetch-Dest: empty' \
-  -H 'Referer: https://40.69.185.20/harbor/projects/2/configs' \
-  -H 'Accept-Language: en-US,en;q=0.9' \
-  -H 'Cookie: _gorilla_csrf=MTYwMzI0MzMyOHxJa05qVW1waVpUaGlVREp0VWpsSEszTmljV2QwTVZseFVYSXhSV0ZCY1dsUE1HZ3pia00yZGt4VE56QTlJZ289fIkI5cxwOLIwL3W-5XPNSvsyYkKcW7uW8qhoqgjfX6F8; sid=ea529735329cc961664167b0bb494adf; harbor-lang=en-us' \
+curl -u "admin:Harbor12345" \
+  -H "Content-Type: application/json" \
+  -ki https://amaaks/api/v2.0/replication/projects/1 \
   --data-binary '{"metadata":{"public":"true","enable_content_trust":"false","prevent_vul":"false","severity":"low","auto_scan":"false","reuse_sys_cve_allowlist":"true"},"cve_allowlist":{"creation_time":"2020-10-18T05:34:49.078Z","id":1,"items":[],"project_id":2,"update_time":"2020-10-21T03:18:08.064Z","expires_at":null}}' \
   --compressed \
   --insecure
 
-# Create Replica
-  curl -b cookie.txt 'https://40.69.185.20/api/v2.0/replication/policies' \
-  -H 'Connection: keep-alive' \
-  -H 'Pragma: no-cache' \
-  -H 'Cache-Control: no-cache' \
-  -H 'Accept: application/json' \
-  -H 'DNT: 1' \
-  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36 Edg/86.0.622.43' \
-  -H 'X-Harbor-CSRF-Token: wFy0oj88FwHlzvseNtKK7unc1wuJOfbPjslQVflaDdvJmNfP0CcoaHQ6lLJYeqc7Y0x4WpM7XkFc1LdeUpFGZg==' \
-  -H 'Content-Type: application/json' \
-  -H 'Origin: https://40.69.185.20' \
-  -H 'Sec-Fetch-Site: same-origin' \
-  -H 'Sec-Fetch-Mode: cors' \
-  -H 'Sec-Fetch-Dest: empty' \
-  -H 'Referer: https://40.69.185.20/harbor/replications' \
-  -H 'Accept-Language: en-US,en;q=0.9' \
-  -H 'Cookie: _gorilla_csrf=MTYwMzI0MzMyOHxJa05qVW1waVpUaGlVREp0VWpsSEszTmljV2QwTVZseFVYSXhSV0ZCY1dsUE1HZ3pia00yZGt4VE56QTlJZ289fIkI5cxwOLIwL3W-5XPNSvsyYkKcW7uW8qhoqgjfX6F8; sid=d0f27f91a334ddecd4ef964682eceab6' \
-  --data-binary '{"name":"code4clouds","description":"","src_registry":null,"dest_registry":{"id":1,"name":"code4clouds","description":"","type":"docker-hub","url":"https://hub.docker.com","token_service_url":"","credential":{"type":"basic","access_key":"","access_secret":""},"insecure":false,"status":"healthy","creation_time":"2020-10-18T05:34:04.572027Z","update_time":"2020-10-21T01:27:35.506767Z"},"dest_namespace":null,"trigger":{"type":"manual","trigger_settings":{"cron":""}},"enabled":true,"deletion":false,"override":false,"filters":[{"type":"name","value":"code4clouds/**"}]}' \
-  --compressed \
-  --insecure
-
 # Execute Replica 
-curl -b cookie.txt 'https://40.69.185.20/api/v2.0/replication/executions' \
-  -H 'Connection: keep-alive' \
-  -H 'Pragma: no-cache' \
-  -H 'Cache-Control: no-cache' \
-  -H 'Accept: application/json' \
-  -H 'DNT: 1' \
-  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.80 Safari/537.36 Edg/86.0.622.43' \
-  -H 'X-Harbor-CSRF-Token: fAyQmI6M4LVni/jm3lgovWOaKyZaRyb52/fXG7gvLXV1yPP1YZff3PZ/l0qw8AVo6QqEd0BFjncJ6jAQE+RmyA==' \
-  -H 'Content-Type: application/json' \
-  -H 'Origin: https://40.69.185.20' \
-  -H 'Sec-Fetch-Site: same-origin' \
-  -H 'Sec-Fetch-Dest: empty' \
-  -H 'Referer: https://40.69.185.20/harbor/replications' \
-  -H 'Accept-Language: en-US,en;q=0.9' \
-  -H 'Cookie: _gorilla_csrf=MTYwMzI0MzMyOHxJa05qVW1waVpUaGlVREp0VWpsSEszTmljV2QwTVZseFVYSXhSV0ZCY1dsUE1HZ3pia00yZGt4VE56QTlJZ289fIkI5cxwOLIwL3W-5XPNSvsyYkKcW7uW8qhoqgjfX6F8; sid=d0f27f91a334ddecd4ef964682eceab6' \
-  -H 'Sec-Fetch-Mode: cors' \
-  -H 'Cookie: sid=sid=ea529735329cc961664167b0bb494adf' \
-  -H 'Content-Type: application/json' \
+curl -u "admin:Harbor12345" \
+  -H "Content-Type: application/json" \
+  -ki https://amaaks/api/v2.0/replication/executions \
   --data-binary '{"policy_id":1}' \
   --compressed \
   --insecure
