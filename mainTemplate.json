@@ -330,7 +330,7 @@
             }
           },
           "imageReference": {
-            "id": "/subscriptions/8ff258b7-0b3b-4827-b240-cb8cfab73615/resourceGroups/amaaksv2/providers/Microsoft.Compute/images/amaaks"
+            "id": "/subscriptions/8ff258b7-0b3b-4827-b240-cb8cfab73615/resourceGroups/amaaksv2/providers/Microsoft.Compute/galleries/amaaks/images/amaaks-image-from-gallery/versions/1.0.0"
           }
         },
         "networkProfile": {

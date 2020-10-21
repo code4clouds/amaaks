@@ -23,6 +23,7 @@ sudo crontab -e
 - Create an image for internal deployments or VM Offer (if targeting the Azure Marketplace) by generalizing the VM
 ``` bash
 sudo waagent -deprovision+user --force
+sudo waagent -force -deprovision+user && export HISTSIZE=0 && sync
 logout
 ```
 - Deallocate the VM
@@ -31,7 +32,9 @@ logout
  az vm generalize --resource-group amaaks --name amaaks
  az image create --resource-group amaaks --name amaaks --source amaaks
  ```
-
+- Create Snapshot
+- Add the image to the image gallery
+- Add the image gallery to the IAM of the resource group.
 
 
 # Testing
