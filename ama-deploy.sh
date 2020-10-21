@@ -12,8 +12,8 @@ az managedapp definition create \
     --description "amaaks-test-description" \
     --location "$location" \
     --resource-group "$resourceGroup" \
-    --create-ui-definition "createUiDefinition.json" \
-    --main-template "mainTemplate.json" \
+    --create-ui-definition @C:"createUiDefinition.json" \
+    --main-template @C:"mainTemplate.json" \
     --lock-level None \
     --authorizations "$userid:$roleid"
 #   --package-file-uri "https://github.com/code4clouds/amaaks/raw/main/amaaks.zip"
