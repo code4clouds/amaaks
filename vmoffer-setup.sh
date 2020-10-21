@@ -90,6 +90,8 @@ sudo mv daemon.json /etc/docker/daemon.json
 # Configure Harbor
 
 # Create Project
+echo "Seeding Harbor..."
+sleep 30
 curl -u "admin:Harbor12345" \
   -H "Content-Type: application/json" \
   -ki https://amaaks/api/v2.0/projects \
@@ -107,16 +109,8 @@ curl -u "admin:Harbor12345" \
 # Create Replica
 curl -u "admin:Harbor12345" \
   -H "Content-Type: application/json" \
-  -ki https://amaaks/api/v2.0/replication/policies \  
+  -ki https://amaaks/api/v2.0/replication/policies \
   --data-binary '{"name":"code4clouds","description":"","src_registry":{"id":1,"name":"code4clouds","description":"","type":"docker-hub","url":"https://hub.docker.com","token_service_url":"","credential":{"type":"","access_key":"","access_secret":""},"insecure":false,"status":"healthy","creation_time":"2020-10-21T05:48:49.305762Z","update_time":"2020-10-21T06:01:57.334003Z"},"dest_registry":null,"dest_namespace":null,"trigger":{"type":"manual","trigger_settings":{"cron":""}},"enabled":true,"deletion":false,"override":false,"filters":[{"type":"name","value":"code4clouds/**"}]}' \
-  --compressed \
-  --insecure
-  
-# Make Repo Public
-curl -u "admin:Harbor12345" \
-  -H "Content-Type: application/json" \
-  -ki https://amaaks/api/v2.0/replication/projects/1 \
-  --data-binary '{"metadata":{"public":"true","enable_content_trust":"false","prevent_vul":"false","severity":"low","auto_scan":"false","reuse_sys_cve_allowlist":"true"},"cve_allowlist":{"creation_time":"2020-10-18T05:34:49.078Z","id":1,"items":[],"project_id":2,"update_time":"2020-10-21T03:18:08.064Z","expires_at":null}}' \
   --compressed \
   --insecure
 
@@ -127,6 +121,7 @@ curl -u "admin:Harbor12345" \
   --data-binary '{"policy_id":1}' \
   --compressed \
   --insecure
+echo "Seeding Harbor Completed..."
 
 # Install KubeCtl
 sudo apt-get update && sudo apt-get install -y apt-transport-https gnupg2 curl
@@ -144,14 +139,10 @@ wget https://raw.githubusercontent.com/code4clouds/amaaks/main/kanary-deployment
 wget https://raw.githubusercontent.com/code4clouds/amaaks/main/kanary-service.yaml 
 
 exit;
-# Set cron to assure all Docker-compose service are up
-# sudo crontab -e
-# @reboot sleep 60 && cd /home/amaaks/harbor && docker-compose up -d
 
 # Testing the registry by upload a container to amaaks
-# docker login amaaks:443
-#docker pull code4clouds/canarykontainer:1.1
-#docker tag code4clouds/canarykontainer:1.1 amaaks:443/library/canarykontainer:1.1
-#docker push amaaks:443/library/canarykontainer:1.1
+#sudo docker login amaaks:443 -u admin
+#sudo docker tag code4clouds/canarykontainer:1.1 amaaks:443/library/canarykontainer:1.1
+#sudo docker push amaaks:443/library/canarykontainer:1.1
 #Setup replication for dockerhub (check the pictures on how to do this)
-# docker pull amaaks:443/code4clouds/canarykontainer:1.2
+#sudo docker pull amaaks:443/code4clouds/canarykontainer:1.2
