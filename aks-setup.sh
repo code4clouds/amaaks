@@ -1,8 +1,15 @@
 #!/bin/bash
-az login --identity
+# az login --identity
 
-az login --identity -u /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
-az login --identity -u /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+# az login --identity -u /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+# az login --identity -u /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+if [ "$#" -ne 0 ]
+  then 
+    echo "Converting kubeconfig..."
+    mkdir -p ~/.kube
+    echo $1 | base64 --decode > ~/.kube/config
+    echo "Converted kubeconfig."
+fi
 
 az aks get-credentials --resource-group amaaksv2 --name amaaks --admin
 

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Requires Ubuntu host 18.04 DS2_V2 using hostname and user amaaks
+
 # Install Docker https://docs.docker.com/engine/install/ubuntu/
 sudo apt-get updates
 sudo apt-get upgrade -y
@@ -99,7 +100,7 @@ curl -u "admin:Harbor12345" \
   --data-binary '{"project_name":"code4clouds","registry_id":null,"metadata":{"public":"true"},"storage_limit":-1}' \
   --compressed \
   --insecure
-  
+
 # Create Registry Endpoint
 curl -u "admin:Harbor12345" \
   -H "Content-Type: application/json" \
@@ -144,7 +145,7 @@ wget https://raw.githubusercontent.com/code4clouds/amaaks/main/kanary-deployment
 wget https://raw.githubusercontent.com/code4clouds/amaaks/main/kanary-service.yaml 
 wget https://raw.githubusercontent.com/code4clouds/amaaks/main/aks-setup.sh
 sudo chmod +x aks-setup.sh
-./aks-setup.sh
+./aks-setup.sh $1
 
 exit;
 
