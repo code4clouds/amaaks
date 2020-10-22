@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# set -x
 # Requires Ubuntu host 18.04 DS2_V2 using hostname and user amaaks
 # This script needs to be converted to b64 if used on a clean ubuntu install and not a 'cooked' image.  The resulting script is in the mainTemplate.json.
 # base64 -w 0 vmoffer-fullscript.sh > vmoffer-fullscript.sh.b64
@@ -150,7 +150,10 @@ wget https://raw.githubusercontent.com/code4clouds/amaaks/main/kanary-service.ya
 if [ "$#" -ne 0 ]
   then 
     echo "Converting kubeconfig..."
-    echo $1 | base64 --decode > kube.config
+    echo $1
+    echo $1 > kube.config.b64
+    cat kube.config.b64 | base64 --decode > kube.config
+    cat kube.config
     echo "Converted kubeconfig."
   else 
     echo "Getting kubeconfig using az get-creadentials..."
