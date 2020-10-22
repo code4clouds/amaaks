@@ -479,7 +479,7 @@
       "name": "ClusterSubnetRoleAssignmentDeployment",
       "apiVersion": "2017-05-10",
       "resourceGroup": "[resourceGroup().name]",
-      "subscriptionId": "8ff258b7-0b3b-4827-b240-cb8cfab73615",
+      "subscriptionId": "[subscription().subscriptionId]",
       "properties": {
         "mode": "Incremental",
         "template": {
