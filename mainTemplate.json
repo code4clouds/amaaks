@@ -103,7 +103,6 @@
         "description": "Specify the region for your OMS workspace."
       }
     },
-
     "serviceCidr": {
       "type": "string",
       "metadata": {
@@ -171,7 +170,7 @@
       "type": "string",
       "defaultValue": "amaaks-vm"
     },
-    "virtualMachineComputerName": {
+    "virtualMachineHostnameName": {
       "type": "string",
       "defaultValue": "amaaks"
     },
@@ -309,7 +308,9 @@
         "[parameters('zone')]"
       ]
     },
+
     {
+
       "name": "[parameters('virtualMachineName')]",
       "type": "Microsoft.Compute/virtualMachines",
       "apiVersion": "2019-07-01",
@@ -344,7 +345,7 @@
           ]
         },
         "osProfile": {
-          "computerName": "[parameters('virtualMachineComputerName')]",
+          "computerName": "[parameters('virtualMachineHostnameName')]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
@@ -359,7 +360,7 @@
       ]
     },
     {
-      "name": "[concat(parameters('virtualMachineComputerName'),'/CustomScriptExtension')]",
+      "name": "[concat(parameters('virtualMachineName'),'/CustomScriptExtension')]",
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "apiVersion": "2020-06-01",
       "location": "[parameters('location')]",
@@ -372,7 +373,7 @@
         "typeHandlerVersion": "2.1",
         "autoUpgradeMinorVersion": true,
         "settings": {
-          "commandToExecute": "sh ./vmoffer-setup.sh",
+          "commandToExecute": "[concat('sh ./vmoffer-setup.sh ', '==')]",
           "script": "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",
           "managedIdentity": "<managed-identity-identifier>",
           "fileUris": []
@@ -386,12 +387,12 @@
     },
     {
       "apiVersion": "2020-03-01",
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_amaaks_name'))]"
-      ],
       "type": "Microsoft.ContainerService/managedClusters",
       "name": "[parameters('clusterName')]",
       "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_amaaks_name'))]"
+      ],
       "properties": {
         "kubernetesVersion": "[parameters('kubernetesVersion')]",
         "enableRBAC": "[parameters('enableRBAC')]",
@@ -511,11 +512,11 @@
       "dependsOn": [
       ]
     }
-
-
-
   ],
   "outputs": {
-
+    "k8config": {
+      "type": "object",
+      "value": "[listClusterAdminCredential(parameters('clusterName'), '2020-03-01')]"
+    }
   }
 }
