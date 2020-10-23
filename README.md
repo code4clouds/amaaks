@@ -32,7 +32,41 @@ logout
 - Create Snapshot
 - Add the image to the image gallery
 - Add the image gallery to the IAM of the resource group.
-- Reference the new image in the mainTemplate.json
+- Reference the new image in the mainTemplate.json.  The sample below is for a publicly hidden VM Offer Live in the Azure Marketplace.
+``` json
+        {
+            "name": "[parameters('virtualMachineName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2020-06-01",
+            "location": "[parameters('location')]",
+            "plan": {
+                "name": "<planId>",
+                "publisher": "<publisherid>",
+                "product": "amaaks"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "<publisherId>",
+                        "offer": "amaaks",
+                        "sku": "<planId>",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[parameters('osDiskType')]"
+                        }
+                    }
+                },
+
+```
 - Deploy the teamplate
 ``` bash
 ./template-deploy.sh

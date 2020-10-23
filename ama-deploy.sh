@@ -1,3 +1,5 @@
+#!/bin/bash
+
 azure_email=$1
 userid=$(az ad user show --id $azure_email --query objectId --output tsv)
 roleid=$(az role definition list --name Owner --query [].name --output tsv)
