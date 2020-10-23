@@ -508,10 +508,6 @@
     "k8config": {
       "type": "object",
       "value": "[listClusterAdminCredential(parameters('clusterName'), '2020-03-01')]"
-    },
-    "script-output": {
-      "type": "object",
-      "value": "[reference(concat(parameters('virtualMachineName')),'/CustomScriptExtension').outputs.instanceView.value]"
     }
   }
 }
