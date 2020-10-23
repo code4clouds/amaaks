@@ -8,8 +8,8 @@ az group create --name $resourceGroup --location "$location"
 
 az managedapp definition create \
     --name "amaaks-test" \
-    --display-name "amaaks-test-displayname" \
-    --description "amaaks-test-description" \
+    --display-name "Azure Manage Apps - AKS" \
+    --description "A sample POC for AKS in Manage Apps" \
     --location "$location" \
     --resource-group "$resourceGroup" \
     --create-ui-definition @C:"createUiDefinition.json" \
