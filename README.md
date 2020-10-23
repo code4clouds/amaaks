@@ -32,9 +32,17 @@ logout
 - Create Snapshot
 - Add the image to the image gallery
 - Add the image gallery to the IAM of the resource group.
+- Reference the new image in the mainTemplate.json
+- Deploy the teamplate
+``` bash
+./template-deploy.sh
+```
+- Or Deploy as a manage app
+``` bash
+./ama-deploy/sh <your email>
+```
 
-
-## Plain Ubbuntu Image VM
+## Plain Ubuntu Image VM
 ``` bash
  base64 -w 0 vmoffer-fullscript.sh > vmoffer-fullscript.sh.b64
 ```
