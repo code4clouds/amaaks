@@ -4,7 +4,14 @@
 # This script needs to be converted to b64 if used on a clean ubuntu install and not a 'cooked' image.  The resulting script is in the mainTemplate.json.
 # base64 -w 0 vmoffer-fullscript.sh > vmoffer-fullscript.sh.b64
 
+
+# If the Ubuntu image is clean then install the tools
+if ! pgrep -x "dockerd" >/dev/null
+then
+    echo "Configuring this clena image..." 
+    
 # Install Docker https://docs.docker.com/engine/install/ubuntu/
+
 sudo apt-get updates
 sudo apt-get upgrade -y
 sudo apt-get install -y \
@@ -16,9 +23,9 @@ sudo apt-get install -y \
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo apt-key fingerprint 0EBFCD88
 sudo add-apt-repository \
-   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-   $(lsb_release -cs) \
-   stable"
+  "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) \
+  stable"
 sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 sudo usermod -aG docker amaaks
@@ -145,6 +152,9 @@ curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 wget https://raw.githubusercontent.com/code4clouds/amaaks/main/aks-harbor-ca-daemonset.yaml 
 wget https://raw.githubusercontent.com/code4clouds/amaaks/main/kanary-deployment.yaml 
 wget https://raw.githubusercontent.com/code4clouds/amaaks/main/kanary-service.yaml 
+
+echo "Configured the cleaned image."
+fi # End image check
 
 # Save the kubeconfig locally
 if [ "$#" -ne 0 ]
