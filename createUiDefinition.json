@@ -24,7 +24,7 @@
         "outputs": {
             "tagsByResource": "[steps('tags').tagsByResource]",
             "clusterName": "[basics('clusterName')]",
-            "kubeconfig": "[listClusterAdminCredential(basics('clusterName')), '2020-03-01')]"
+            "kubeconfig": "listClusterAdminCredential(parameters('clusterName'), '2020-03-01').kubeconfigs[0].value"
         }
     }
 }
