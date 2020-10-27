@@ -194,7 +194,7 @@ kind: Service
 metadata:
   name: kanary-service
   annotations:
-    service.beta.kubernetes.io/azure-load-balancer-resource-group: $2
+    # service.beta.kubernetes.io/azure-load-balancer-resource-group: $2
 spec:
   type: LoadBalancer
   selector:
@@ -203,7 +203,7 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 5000
-  loadBalancerIP: $3
+  # loadBalancerIP: $3
 EOF
 
 
