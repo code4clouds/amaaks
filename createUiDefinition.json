@@ -6,25 +6,44 @@
         "basics": [],
         "steps": [
             {
-                "name": "kubernets",
+                "name": "kubernetes",
                 "label": "Kubernetes",
                 "elements": [
                     {
                         "name": "clusterName",
                         "type": "Microsoft.Common.TextBox",
-                        "label": "Sample Input",
+                        "label": "Cluster Name",
                         "defaultValue": "amaaks-cluster",
                         "constraints": {
                             "required": false
-                        }
+                        },
+                        "toolTip": "The name of the cluster"
+                    },
+                    {
+                        "name": "adminPassword",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password": "Password",
+                            "confirmPassword": "Confirm password"
+                        },
+                        "toolTip": "The password for AMAAKS",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-zA-Z0-9!@#]{8,}$",
+                            "validationMessage": "Password must be at least 8 characters long, contain only numbers and letters"
+                        },
+                        "options": {
+                            "hideConfirmation": false
+                        },
+                        "visible": true
                     }
                 ]
             }
         ],
         "outputs": {
-            "tagsByResource": "[steps('tags').tagsByResource]",
             "clusterName": "[basics('clusterName')]",
-            "kubeconfig": "listClusterAdminCredential(parameters('clusterName'), '2020-03-01').kubeconfigs[0].value"
+            "location": "[basics('location')]",
+            "adminPassword": "[steps('kubernetes').adminPassword]"
         }
     }
 }

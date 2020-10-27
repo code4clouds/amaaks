@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Save the kubeconfig locally
 if [ "$#" -ne 0 ]
   then 
     echo "Converting kubeconfig..."
@@ -26,11 +27,28 @@ data:
 EOF
 
 kubectl apply -f aks-harbor-ca-daemonset.yaml  --kubeconfig=kube.config 
-kubectl create secret docker-registry amaaksregcred --docker-server=amaaks --docker-username=admin --docker-password=Harbor12345 --docker-email=someguy@code4clouds.com --kubeconfig=kube.config 
+kubectl create secret docker-registry amaaksregcred --docker-server=amaaks --docker-username=admin --docker-password=Harbor12345 --docker-email=someguy@code4clouds.com --kubeconfig=kube.config
 
 # Deploy containers
-kubectl apply -f kanary-deployment.yaml --kubeconfig=kube.config 
-kubectl apply -f kanary-service.yaml --kubeconfig=kube.config 
+kubectl apply -f kanary-deployment.yaml --kubeconfig=kube.config
+
+cat <<EOF | kubectl apply --kubeconfig=kube.config -f -
+apiVersion: v1
+kind: Service
+metadata:
+  name: kanary-service
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-resource-group: $2
+spec:
+  type: LoadBalancer
+  selector:
+    app: kanary
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+  loadBalancerIP: $3
+EOF
 
 
 exit;
