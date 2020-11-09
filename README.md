@@ -1,5 +1,8 @@
 Prototyping DO NOT USE
 
+# Goal
+Proof of concept to show how to use a private container registry to distribute container images to an Azure Kubernetes Cluster using an Azure Virtual Machine.
+
 # Requirements
 Azure Ubuntu 18.04 VM
 
