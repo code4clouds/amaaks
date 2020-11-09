@@ -1,10 +1,10 @@
-# Goal
+# AMAAKS
 Proof of concept to show how to use a private container registry to distribute container images to an Azure Kubernetes Cluster using an Azure Virtual Machine.
 
-# Requirements
+## Requirements
 Azure Ubuntu 18.04 VM
 
-# Creation of VM Offer
+## Creation of VM Offer
 - Create an Ubuntu VM and log in
 - Download the setup script
 ``` bash
