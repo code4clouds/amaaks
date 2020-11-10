@@ -3,6 +3,7 @@ Proof of concept to show how to use a private container registry to distribute c
 
 ## Requirements
 Azure Ubuntu 18.04 VM
+Azure Account Subscription
 
 ## Creation of VM Offer
 - Create an Ubuntu VM and log in
